@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malin's Quest: Interactive Narrative Adventure (v1.0 Final)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f3d5e;
+      --primary-light: #1a5b88;
+      --accent: #d97706;
+      --accent-hover: #b45309;
+      --bg: #f4f7f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --border: #cbd5e1;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 84px; /* ruang untuk sticky button mobile */
+    }
+
+    /* Sticky Top Navigation & Progress Bar (Perbaikan LK-5 No. 4) */
+    header.topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .topbar-inner {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: #bae6fd;
+    }
+
+    .hud {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-pill {
+      background: rgba(255, 255, 255, 0.16);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .btn-help {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-help:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Progress Bar Babak 1-4 */
+    .progress-wrap {
+      background: #092940;
+      padding: 6px 16px 10px;
+    }
+
+    .progress-inner {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #fbbf24);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    main.container {
+      max-width: 820px;
+      margin: 20px auto;
+      padding: 0 14px;
+    }
+
+    .screen {
+      display: none;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 4px 18px rgba(15, 61, 94, 0.07);
+      border: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Ilustrasi Proporsional untuk Semua Rasio Layar HP 20:9 & Laptop (Perbaikan LK-5 No. 3) */
+    .illustration-box {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 290px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      background: #e0f2fe;
+      position: relative;
+      border: 1px solid #bae6fd;
+    }
+
+    .illustration-box svg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .scene-caption {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #fff;
+      font-size: 0.74rem;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .instruction-strip {
+      background: #fffbeb;
+      border-left: 4px solid var(--accent);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      color: #78350f;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .cp-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin: 14px 0 18px;
+      font-size: 0.88rem;
+    }
+
+    .cp-box h3 {
+      font-size: 0.92rem;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .cp-box ul {
+      padding-left: 18px;
+      color: #334155;
+    }
+
+    .cp-box li {
+      margin-bottom: 4px;
+    }
+
+    /* Narrative Story Text & Smart Glossary */
+    .story-card {
+      font-family: 'Merriweather', serif;
+      font-size: 0.98rem;
+      line-height: 1.8;
+      color: #1e293b;
+      background: #fcfdfe;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .story-card p {
+      margin-bottom: 12px;
+    }
+
+    .story-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .gloss-word {
+      background: #fef3c7;
+      color: #92400e;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 5px;
+      border-bottom: 2px dashed #d97706;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.92rem;
+    }
+
+    .gloss-word:hover, .gloss-word:focus {
+      background: #fde68a;
+    }
+
+    /* Smart Glossary Pop-up Drawer (Mobile-Friendly) */
+    .glossary-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+    }
+
+    .glossary-modal-backdrop.open {
+      display: flex;
+    }
+
+    .glossary-sheet {
+      background: #fff;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.2s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .glossary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .glossary-word-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .glossary-pos {
+      font-size: 0.78rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    /* Quiz & Decision Buttons */
+    .task-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .task-title {
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-weight: 500;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary-light);
+      background: #f0f9ff;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+      opacity: 0.92;
+    }
+
+    .option-btn.correct {
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: #14532d;
+      font-weight: 700;
+    }
+
+    .option-btn.wrong {
+      background: var(--danger-bg);
+      border-color: var(--danger);
+      color: #7f1d1d;
+    }
+
+    .feedback-msg {
+      display: none;
+      margin-top: 12px;
+      padding: 11px 14px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .feedback-msg.show {
+      display: block;
+    }
+
+    .feedback-msg.ok {
+      background: var(--success-bg);
+      color: #14532d;
+      border: 1px solid #86efac;
+    }
+
+    .feedback-msg.err {
+      background: var(--danger-bg);
+      color: #7f1d1d;
+      border: 1px solid #fca5a5;
+    }
+
+    /* Compact Jumbled Paragraphs Cards for Mobile <= 6.1" (Perbaikan LK-5 No. 1) */
+    .jumbled-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px; /* dipadatkan agar ringkas di layar HP */
+    }
+
+    .jumbled-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 9px;
+      padding: 7px 10px; /* compact padding */
+      font-size: 0.82rem; /* compact readable font */
+      line-height: 1.38;
+    }
+
+    .jumbled-num {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.75rem;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .jumbled-text {
+      flex: 1;
+      color: #1e293b;
+    }
+
+    .jumbled-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .move-btn {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 5px;
+      width: 28px;
+      height: 24px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .move-btn:hover:not(:disabled) {
+      background: #cbd5e1;
+    }
+
+    .move-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    /* Sticky Bottom Action Bar (Perbaikan LK-5 No. 1) */
+    .sticky-action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid #cbd5e1;
+      padding: 10px 16px;
+      z-index: 45;
+      display: flex;
+      justify-content: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .sticky-action-inner {
+      width: 100%;
+      max-width: 820px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.94rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    /* Final Score & Badge Screen */
+    .result-hero {
+      text-align: center;
+      padding: 14px 10px;
+    }
+
+    .badge-emblem {
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 4px solid #f59e0b;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25);
+    }
+
+    .final-score-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+
+    .kktp-status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .kktp-pass {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .kktp-retry {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .summary-copy-box {
+      background: #f1f5f9;
+      border: 1px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 16px 0;
+      font-size: 0.85rem;
+      text-align: left;
+      color: #334155;
+    }
+
+    .action-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    /* Footer Kredit Aset & Lisensi (Perbaikan LK-5 No. 6) */
+    footer.credits {
+      max-width: 820px;
+      margin: 24px auto 12px;
+      padding: 14px 16px;
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--muted);
+      border-top: 1px solid #cbd5e1;
+    }
+
+    @media (max-width: 540px) {
+      .screen { padding: 16px; }
+      h1 { font-size: 1.3rem; }
+      .story-card { font-size: 0.92rem; padding: 13px; }
+      .sticky-action-inner { justify-content: stretch; }
+      .sticky-action-inner .btn-primary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION & PROGRESS BAR -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-title">Malin’s Quest: Narrative Adventure</span>
+        <span class="brand-sub">Bahasa Inggris Fase F (Kelas XII) • v1.0 (Final)</span>
+      </div>
+      <div class="hud">
+        <span class="score-pill">Skor: <span id="hudScore">0</span>/100</span>
+        <button type="button" class="btn-help" onclick="openHelpModal()">Petunjuk Main</button>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-inner">
+        <div class="progress-labels">
+          <span id="stageLabel">Halaman Awal (Pengantar)</span>
+          <span id="stageStep">0 / 4 Babak</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- SCREEN 0: LANDING PAGE -->
+    <section id="screen-0" class="screen active">
+      <div class="illustration-box">
+        <!-- Ilustrasi SVG Pesisir Air Manis (Ringan, Tajam & Proporsional) -->
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sky0" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0ea5e9"/>
+              <stop offset="65%" stop-color="#bae6fd"/>
+              <stop offset="100%" stop-color="#fef3c7"/>
+            </linearGradient>
+            <linearGradient id="sea0" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0f3d5e"/>
+            </linearGradient>
+          </defs>
+          <rect width="800" height="270" fill="url(#sky0)"/>
+          <circle cx="640" cy="110" r="46" fill="#fde047" opacity="0.9"/>
+          <path d="M0 240 Q180 170 360 235 T800 220 L800 270 L0 270 Z" fill="#1e3a5f" opacity="0.45"/>
+          <rect y="255" width="800" height="195" fill="url(#sea0)"/>
+          <path d="M0 340 Q220 315 450 375 L800 390 L800 450 L0 450 Z" fill="#d97706"/>
+          <path d="M0 365 Q240 340 480 400 L800 415 L800 450 L0 450 Z" fill="#b45309"/>
+          <!-- Perahu Nelayan -->
+          <path d="M470 265 L590 265 L565 292 L490 292 Z" fill="#78350f"/>
+          <line x1="530" y1="185" x2="530" y2="265" stroke="#451a03" stroke-width="5"/>
+          <polygon points="533,190 585,252 533,252" fill="#fffbeb"/>
+        </svg>
+        <span class="scene-caption">Pantai Air Manis • Adaptasi Legenda Nusantara</span>
+      </div>
+
+      <span class="badge-tag">Interactive Narrative Text • CEFR Level B1</span>
+      <h1>Malin’s Quest: Interactive Narrative Adventure</h1>
+      <p style="color:#475569; margin-bottom:12px;">
+        Jelajahi kisah interaktif legenda <strong>Malin Kundang</strong> dalam bahasa Inggris. Setiap keputusan moral, pemahaman kosakata, serta ketepatan struktur teks dan tata bahasa menentukan akhir petualangan serta perolehan lencanamu!
+      </p>
+
+      <div class="cp-box">
+        <h3>Capaian & Tujuan Pembelajaran (Fase F – Kelas XII)</h3>
+        <ul>
+          <li><strong>Fungsi Sosial & Struktur Teks:</strong> Mengidentifikasi bagian <em>Orientation, Complication, Climax,</em> dan <em>Resolution</em> pada <em>Narrative Text</em>.</li>
+          <li><strong>Unsur Kebahasaan:</strong> Memahami penggunaan <em>Simple Past Tense</em> dan kosakata kontekstual melalui fitur <strong>Smart Glossary</strong>.</li>
+          <li><strong>Berpikir Kritis (HOTS):</strong> Mengevaluasi nilai moral cerita serta mencapai ketuntasan belajar <strong>(KKTP ≥ 75)</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="instruction-strip">
+        💡 <strong>Tips Bermain:</strong> Klik kata berwarna kuning (<span class="gloss-word">seperti ini</span>) di dalam cerita untuk membuka arti kontekstual pada <em>Smart Glossary</em>.
+      </div>
+    </section>
+
+    <!-- SCREEN 1: BABAK 1 (PROLOGUE & ORIENTATION + SMART GLOSSARY) -->
+    <section id="screen-1" class="screen">
+      <div class="illustration-box">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="800" height="450" fill="#bae6fd"/>
+          <circle cx="150" cy="95" r="38" fill="#fef08a"/>
+          <rect y="270" width="800" height="180" fill="#0369a1"/>
+          <path d="M0 320 L420 330 L520 450 L0 450 Z" fill="#ca8a04"/>
+          <!-- Pondok Kayu Sederhana -->
+          <rect x="90" y="235" width="140" height="95" fill="#92400e"/>
+          <polygon points="75,235 160,175 245,235" fill="#451a03"/>
+          <rect x="145" y="275" width="35" height="55" fill="#fef3c7"/>
+        </svg>
+        <span class="scene-caption">Babak 1: Orientation – Desa Pesisir Air Manis</span>
+      </div>
+
+      <span class="badge-tag">Babak 1 dari 4 • Orientation & Vocabulary</span>
+      <h2>The Humble Beginning</h2>
+      <div class="instruction-strip">
+        📌 <strong>Instruksi:</strong> Baca paragraf di bawah ini, klik kata yang disorot untuk melihat artinya, lalu jawab pertanyaan pemahaman struktur teks.
+      </div>
+
+      <div class="story-card">
+        <p>
+          Long ago, in a quiet coastal village in West Sumatra, there lived a poor widow named <strong>Mande Rubayah</strong> and her only son, <strong>Malin Kundang</strong>. After his father passed away at sea, Malin grew up as a <span class="gloss-word" onclick="openGlossary('diligent')">diligent</span> and <span class="gloss-word" onclick="openGlossary('courageous')">courageous</span> young man.
+        </p>
+        <p>
+          Every morning, Malin helped his mother gather firewood and catch fish near the <span class="gloss-word" onclick="openGlossary('harbor')">harbor</span>. Although their life was simple, Mande Rubayah always prayed for her son's bright future and taught him to stay <span class="gloss-word" onclick="openGlossary('humble')">humble</span> wherever he went.
+        </p>
+      </div>
+
+      <div class="task-box">
+        <div class="task-title">Tantangan Babak 1 (20 Poin): Berdasarkan struktur Narrative Text, apa fungsi utama bagian cerita di atas?</div>
+        <div class="options-list" id="q1-options">
+          <button type="button" class="option-btn" onclick="answerMCQ(1, 0, false, this)">A. Climax – Menampilkan puncak konflik antara Malin dan ibunya.</button>
+          <button type="button" class="option-btn" onclick="answerMCQ(1, 1, true, this)">B. Orientation – Memperkenalkan tokoh, latar tempat, dan situasi awal cerita.</button>
+          <button type="button" class="option-btn" onclick="answerMCQ(1, 2, false, this)">C. Resolution – Menyelesaikan seluruh permasalahan yang dialami tokoh utama.</button>
+        </div>
+        <div id="q1-feedback" class="feedback-msg"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: BABAK 2 (COMPLICATION – CERITA BERCABANG & SIMPLE PAST TENSE) -->
+    <section id="screen-2" class="screen">
+      <div class="illustration-box">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="800" height="260" fill="#38bdf8"/>
+          <rect y="260" width="800" height="190" fill="#0f3d5e"/>
+          <!-- Kapal Saudagar Besar -->
+          <path d="M240 250 L560 250 L515 315 L285 315 Z" fill="#7c2d12"/>
+          <rect x="330" y="215" width="140" height="35" fill="#b45309"/>
+          <line x1="360" y1="105" x2="360" y2="215" stroke="#451a03" stroke-width="7"/>
+          <line x1="445" y1="120" x2="445" y2="215" stroke="#451a03" stroke-width="7"/>
+          <polygon points="364,110 430,195 364,195" fill="#fef3c7"/>
+          <polygon points="449,125 505,195 449,195" fill="#fffbeb"/>
+        </svg>
+        <span class="scene-caption">Babak 2: Complication – Pelayaran Kapal Saudagar</span>
+      </div>
+
+      <span class="badge-tag">Babak 2 dari 4 • Complication, Moral Choice & Grammar</span>
+      <h2>The Voyage of Ambition</h2>
+      <div class="instruction-strip">
+        📌 <strong>Instruksi:</strong> Tentukan pilihan keputusan moral Malin di perantauan, lalu lengkapi kalimat <em>Simple Past Tense</em> di bawahnya.
+      </div>
+
+      <div class="story-card">
+        <p>
+          One day, a large <span class="gloss-word" onclick="openGlossary('merchant')">merchant</span> ship anchored near the village. Malin saw a golden opportunity to change his family's <span class="gloss-word" onclick="openGlossary('destiny')">destiny</span>. With a heavy heart, Mande Rubayah allowed him to sail away.
+        </p>
+        <p>
+          Years passed. Through hard work and intelligence, Malin became a wealthy captain and married a noblewoman. When his grand ship finally returned to his hometown, villagers recognized him and quickly informed his aging mother.
+        </p>
+      </div>
+
+      <!-- Pilihan Moral Bercabang (10 Poin) -->
+      <div class="task-box">
+        <div class="task-title">Keputusan Moral Bercabang (10 Poin): Saat Mande Rubayah berlari memanggil namanya di dermaga, sikap apa yang seharusnya diambil Malin?</div>
+        <div class="options-list" id="q2a-options">
+          <button type="button" class="option-btn" onclick="chooseBranch(0, this)">Pilihan A: Merasa malu di hadapan istrinya yang bangsawan dan menyangkal bahwa wanita tua itu adalah ibunya.</button>
+          <button type="button" class="option-btn" onclick="chooseBranch(1, this)">Pilihan B: Segera turun dari kapal, memeluk Mande Rubayah dengan bangga, dan memperkenalkannya kepada sang istri.</button>
+        </div>
+        <div id="branch-feedback" class="feedback-msg"></div>
+      </div>
+
+      <!-- Latihan Simple Past Tense (20 Poin) -->
+      <div class="task-box">
+        <div class="task-title">Tantangan Grammar – Simple Past Tense (20 Poin): Lengkapi kalimat berikut dengan bentuk kata kerja lampau yang tepat!</div>
+        <p style="font-size:0.9rem; margin-bottom:10px; color:#334155;">
+          <em>"When Mande Rubayah _______ Malin's scar on his arm, she immediately _______ that he was her beloved son."</em>
+        </p>
+        <div class="options-list" id="q2b-options">
+          <button type="button" class="option-btn" onclick="answerMCQ(2, 0, false, this)">A. see / know</button>
+          <button type="button" class="option-btn" onclick="answerMCQ(2, 1, true, this)">B. saw / knew</button>
+          <button type="button" class="option-btn" onclick="answerMCQ(2, 2, false, this)">C. seen / known</button>
+        </div>
+        <div id="q2b-feedback" class="feedback-msg"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: BABAK 3 (CLIMAX, RESOLUTION & JUMBLED PARAGRAPHS) -->
+    <section id="screen-3" class="screen">
+      <div class="illustration-box">
+        <svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="800" height="450" fill="#1e293b"/>
+          <path d="M510 40 L465 150 L505 150 L455 260" stroke="#fde047" stroke-width="7" fill="none"/>
+          <rect y="280" width="800" height="170" fill="#0f172a"/>
+          <!-- Batu Karang Malin -->
+          <polygon points="330,360 390,265 460,285 495,360" fill="#64748b"/>
+          <polygon points="365,360 405,295 445,360" fill="#475569"/>
+        </svg>
+        <span class="scene-caption">Babak 3: Climax & Resolution – Badai dan Batu Karang</span>
+      </div>
+
+      <span class="badge-tag">Babak 3 dari 4 • Climax, Resolution & Text Organization</span>
+      <h2>The Storm & Jumbled Paragraphs</h2>
+      <div class="instruction-strip">
+        📌 <strong>Instruksi:</strong> Gunakan tombol <strong>▲ / ▼</strong> untuk mengurutkan 5 potongan cerita berikut dari awal hingga akhir (1 → 5), lalu tekan tombol konfirmasi di bawah layar.
+      </div>
+
+      <div class="task-box" style="margin-top:0;">
+        <div class="task-title">Susun Urutan Peristiwa Narrative Text (25 Poin):</div>
+        <div class="jumbled-list" id="jumbledContainer"></div>
+        <div id="q3-feedback" class="feedback-msg"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: BABAK 4 (GRAND CHALLENGE HOTS) -->
+    <section id="screen-4" class="screen">
+      <span class="badge-tag">Babak 4 dari 4 • Grand Challenge HOTS</span>
+      <h2>Critical Thinking & Moral Reflection</h2>
+      <div class="instruction-strip">
+        📌 <strong>Instruksi:</strong> Jawab soal analisis tingkat tinggi (HOTS) berikut untuk menentukan skor akhir dan lencana pencapaianmu!
+      </div>
+
+      <div class="story-card">
+        <p>
+          In the traditional ending, Malin's <span class="gloss-word" onclick="openGlossary('arrogance')">arrogance</span> led to his <span class="gloss-word" onclick="openGlossary('petrified')">petrified</span> fate on the shore. However, in modern storytelling, readers are invited to reflect on why pride often blinds people from appreciating those who sacrificed for their success.
+        </p>
+      </div>
+
+      <div class="task-box">
+        <div class="task-title">Soal HOTS (25 Poin): Mengapa tindakan Malin menyangkal ibunya di depan umum menjadi titik balik (turning point) paling fatal dalam alur cerita?</div>
+        <div class="options-list" id="q4-options">
+          <button type="button" class="option-btn" onclick="answerMCQ(4, 0, false, this)">A. Karena ia kehilangan seluruh harta dagangannya sebelum kapal berlabuh di dermaga.</button>
+          <button type="button" class="option-btn" onclick="answerMCQ(4, 1, true, this)">B. Karena kesombongan dan pengingkaran terhadap pengorbanan orang tua menghancurkan nilai kemanusiaan sekaligus memicu klimaks tragedi cerita.</button>
+          <button type="button" class="option-btn" onclick="answerMCQ(4, 2, false, this)">C. Karena penduduk desa melarang kapal saudagar asing berdagang di wilayah pesisir Sumatra.</button>
+        </div>
+        <div id="q4-feedback" class="feedback-msg"></div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: FINAL SCORE, BADGE & GOOGLE FORMS REKAP -->
+    <section id="screen-5" class="screen">
+      <div class="result-hero">
+        <div class="badge-emblem" id="badgeIcon">🏆</div>
+        <span class="badge-tag" id="badgeTitle">Lencana: Narrative Master</span>
+        <h2>Petualangan Selesai!</h2>
+        <div class="final-score-num"><span id="finalScoreDisplay">0</span> <span style="font-size:1.1rem; color:#64748b;">/ 100</span></div>
+        <div id="kktpBadge" class="kktp-status kktp-pass">Tuntas KKTP (≥ 75)</div>
+
+        <div class="summary-copy-box" id="summaryText">
+          Ringkasan hasil akan muncul di sini...
+        </div>
+
+        <div class="action-grid">
+          <button type="button" class="btn-outline" id="copyBtn" onclick="copyScoreSummary()">📋 Salin Ringkasan Skor</button>
+          <a id="gformLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary">📤 Kirim Rekap ke Guru</a>
+          <button type="button" class="btn-primary" onclick="restartGame()">🔄 Mainkan Ulang</button>
+        </div>
+        <p id="copyNotice" style="font-size:0.8rem; color:#15803d; margin-top:8px; display:none; font-weight:600;">
+          ✔ Ringkasan skor & predikat lencana berhasil disalin! Silakan tempel (paste) jika diperlukan di Google Forms.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- STICKY BOTTOM ACTION BAR (Memudahkan jangkauan ibu jari di HP <= 6.1 inci) -->
+  <div class="sticky-action-bar" id="stickyBar">
+    <div class="sticky-action-inner">
+      <button type="button" class="btn-primary" id="mainActionBtn" onclick="handleMainAction()">
+        Mulai Petualangan ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL SMART GLOSSARY & PETUNJUK -->
+  <div class="glossary-modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="glossary-sheet" onclick="event.stopPropagation()">
+      <div class="glossary-header">
+        <div>
+          <span class="glossary-word-title" id="modalWord">Word</span>
+          <span class="glossary-pos" id="modalPos">adj.</span>
+        </div>
+        <button type="button" class="btn-outline" style="padding:4px 10px; font-size:0.8rem;" onclick="forceCloseModal()">Tutup ✕</button>
+      </div>
+      <p id="modalMeaning" style="font-size:0.95rem; color:#1e293b; margin-bottom:8px;"></p>
+      <p id="modalExample" style="font-size:0.84rem; color:#475569; font-style:italic;"></p>
+    </div>
+  </div>
+
+  <!-- FOOTER KREDIT SUMBER ASET & HAK CIPTA (LK-5 No. 6) -->
+  <footer class="credits">
+    <strong>Malin’s Quest: Interactive Narrative Adventure (v1.0 Final)</strong> • Dikembangkan oleh <strong>Rahmawati, S.S</strong> (Guru Bahasa Inggris SMAN 4 Luwu Utara).<br/>
+    Adaptasi Legenda Rakyat Nusantara (Domain Publik) • Acuan CP/TP Bahasa Inggris Fase F (Kemendikbudristek) • Ilustrasi & Ikon: Canva for Education & Custom SVG • Tipografi: Google Fonts (SIL Open Font License).
+  </footer>
+
+  <script>
+    // Data Smart Glossary (CEFR B1 Contextual)
+    const glossaryData = {
+      diligent: {
+        word: "diligent",
+        pos: "adjective",
+        meaning: "Rajin, tekun, dan bersungguh-sungguh dalam bekerja atau belajar.",
+        example: "Contoh: Malin was a diligent boy who helped his mother every day."
+      },
+      courageous: {
+        word: "courageous",
+        pos: "adjective",
+        meaning: "Berani; tidak takut menghadapi tantangan atau bahaya.",
+        example: "Contoh: The courageous sailor faced the huge ocean waves."
+      },
+      harbor: {
+        word: "harbor",
+        pos: "noun",
+        meaning: "Pelabuhan atau dermaga tempat kapal bersandar.",
+        example: "Contoh: Many merchant ships anchored at the busy harbor."
+      },
+      humble: {
+        word: "humble",
+        pos: "adjective",
+        meaning: "Rendah hati; tidak sombong meskipun memiliki kelebihan atau kekayaan.",
+        example: "Contoh: His mother advised him to stay humble after becoming rich."
+      },
+      merchant: {
+        word: "merchant",
+        pos: "noun / adjective",
+        meaning: "Pedagang atau saudagar yang berdagang antarpulau/negara.",
+        example: "Contoh: He worked hard on a wealthy merchant ship."
+      },
+      destiny: {
+        word: "destiny",
+        pos: "noun",
+        meaning: "Takdir, nasib, atau jalan hidup di masa depan.",
+        example: "Contoh: Malin sailed away to change his family's destiny."
+      },
+      arrogance: {
+        word: "arrogance",
+        pos: "noun",
+        meaning: "Kesombongan atau keangkuhan yang merendahkan orang lain.",
+        example: "Contoh: His arrogance made him deny his own mother."
+      },
+      petrified: {
+        word: "petrified",
+        pos: "adjective",
+        meaning: "Membatu (berubah menjadi batu); juga berarti sangat ketakutan.",
+        example: "Contoh: According to the legend, Malin was petrified on the beach."
+      }
+    };
+
+    // Data Jumbled Paragraphs (Babak 3)
+    const correctParagraphs = [
+      { id: 1, text: "Mande Rubayah lived peacefully with her diligent son, Malin Kundang, in a coastal village." },
+      { id: 2, text: "Malin joined a wealthy merchant ship and sailed across the sea to seek a better life." },
+      { id: 3, text: "After becoming a rich captain, Malin returned to his hometown with his noble wife." },
+      { id: 4, text: "Ashamed of his mother's poor appearance, Malin cruelly denied Mande Rubayah in front of everyone." },
+      { id: 5, text: "Heartbroken, his mother prayed for justice, and a fierce storm turned Malin and his ship into stone." }
+    ];
+
+    let currentParagraphs = [];
+    let currentScreen = 0;
+    let score = 0;
+
+    // State locks agar skor tidak bertambah ganda
+    const state = {
+      q1Answered: false,
+      branchChosen: false,
+      branchRespectful: false,
+      q2Answered: false,
+      q3Checked: false,
+      q4Answered: false
+    };
+
+    const stageNames = [
+      "Halaman Awal (Pengantar)",
+      "Babak 1: Orientation & Smart Glossary",
+      "Babak 2: Complication & Grammar",
+      "Babak 3: Climax & Jumbled Paragraphs",
+      "Babak 4: Grand Challenge HOTS",
+      "Hasil Akhir & Rekapitulasi"
+    ];
+
+    function updateHUD() {
+      document.getElementById("hudScore").textContent = score;
+      document.getElementById("stageLabel").textContent = stageNames[currentScreen];
+      const stepNum = currentScreen >= 5 ? 4 : currentScreen;
+      document.getElementById("stageStep").textContent = `${stepNum} / 4 Babak`;
+      const pct = currentScreen === 0 ? 0 : Math.min(100, (currentScreen / 5) * 100);
+      document.getElementById("progressFill").style.width = pct + "%";
+
+      const bar = document.getElementById("stickyBar");
+      const btn = document.getElementById("mainActionBtn");
+
+      if (currentScreen === 5) {
+        bar.style.display = "none";
+      } else {
+        bar.style.display = "flex";
+        if (currentScreen === 0) {
+          btn.textContent = "Mulai Petualangan ➔";
+          btn.disabled = false;
+        } else if (currentScreen === 1) {
+          btn.textContent = "Lanjut ke Babak 2 ➔";
+          btn.disabled = !state.q1Answered;
+        } else if (currentScreen === 2) {
+          btn.textContent = "Lanjut ke Babak 3 ➔";
+          btn.disabled = !(state.branchChosen && state.q2Answered);
+        } else if (currentScreen === 3) {
+          btn.textContent = state.q3Checked ? "Lanjut ke Babak 4 ➔" : "✔ Periksa Urutan Paragraf";
+          btn.disabled = false;
+        } else if (currentScreen === 4) {
+          btn.textContent = "Lihat Skor & Lencana 🏆";
+          btn.disabled = !state.q4Answered;
+        }
+      }
+    }
+
+    function goToScreen(num) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById("screen-" + num).classList.add("active");
+      currentScreen = num;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (num === 3 && currentParagraphs.length === 0) {
+        initJumbled();
+      }
+      if (num === 5) {
+        renderFinalResult();
+      }
+      updateHUD();
+    }
+
+    function handleMainAction() {
+      if (currentScreen === 0) {
+        goToScreen(1);
+      } else if (currentScreen === 1 && state.q1Answered) {
+        goToScreen(2);
+      } else if (currentScreen === 2 && state.branchChosen && state.q2Answered) {
+        goToScreen(3);
+      } else if (currentScreen === 3) {
+        if (!state.q3Checked) {
+          checkJumbledOrder();
+        } else {
+          goToScreen(4);
+        }
+      } else if (currentScreen === 4 && state.q4Answered) {
+        goToScreen(5);
+      }
+    }
+
+    // Smart Glossary Modal
+    function openGlossary(key) {
+      const item = glossaryData[key];
+      if (!item) return;
+      document.getElementById("modalWord").textContent = item.word;
+      document.getElementById("modalPos").textContent = item.pos;
+      document.getElementById("modalMeaning").textContent = item.meaning;
+      document.getElementById("modalExample").textContent = item.example;
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function openHelpModal() {
+      document.getElementById("modalWord").textContent = "Panduan Singkat";
+      document.getElementById("modalPos").textContent = "Bantuan";
+      document.getElementById("modalMeaning").textContent = "1. Klik kata berlatar kuning untuk membuka arti Smart Glossary. 2. Selesaikan tantangan di setiap babak (target ketuntasan KKTP ≥ 75). 3. Salin ringkasan skor di layar akhir lalu kirim rekap melalui Google Forms.";
+      document.getElementById("modalExample").textContent = "Guru Pengampu: Rahmawati, S.S – SMAN 4 Luwu Utara";
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function closeModal(e) {
+      if (e.target.id === "modalBackdrop") forceCloseModal();
+    }
+
+    function forceCloseModal() {
+      document.getElementById("modalBackdrop").classList.remove("open");
+    }
+
+    // MCQ Handler dengan State Lock (Mencegah skor ganda)
+    function answerMCQ(qNum, optIdx, isCorrect, btnEl) {
+      if (qNum === 1 && state.q1Answered) return;
+      if (qNum === 2 && state.q2Answered) return;
+      if (qNum === 4 && state.q4Answered) return;
+
+      const containerId = qNum === 1 ? "q1-options" : (qNum === 2 ? "q2b-options" : "q4-options");
+      const feedbackId = qNum === 1 ? "q1-feedback" : (qNum === 2 ? "q2b-feedback" : "q4-feedback");
+      const points = qNum === 4 ? 25 : 20;
+
+      const buttons = document.getElementById(containerId).querySelectorAll("button");
+      buttons.forEach(b => b.disabled = true);
+
+      const fb = document.getElementById(feedbackId);
+      fb.classList.add("show");
+
+      if (isCorrect) {
+        btnEl.classList.add("correct");
+        score += points;
+        fb.classList.add("ok");
+        fb.textContent = `✔ Tepat sekali! (+${points} poin). Pemahamanmu terhadap teks sudah akurat.`;
+      } else {
+        btnEl.classList.add("wrong");
+        fb.classList.add("err");
+        if (qNum === 1) {
+          buttons[1].classList.add("correct");
+          fb.textContent = "✖ Kurang tepat. Paragraf pembuka merupakan Orientation karena memperkenalkan tokoh dan latar cerita.";
+        } else if (qNum === 2) {
+          buttons[1].classList.add("correct");
+          fb.textContent = "✖ Kurang tepat. Bentuk lampau (Verb-2) dari 'see' adalah 'saw' dan 'know' adalah 'knew'.";
+        } else {
+          buttons[1].classList.add("correct");
+          fb.textContent = "✖ Kurang tepat. Pengingkaran terhadap orang tua menjadi titik balik moral yang memicu klimaks cerita.";
+        }
+      }
+
+      if (qNum === 1) state.q1Answered = true;
+      if (qNum === 2) state.q2Answered = true;
+      if (qNum === 4) state.q4Answered = true;
+      updateHUD();
+    }
+
+    // Cerita Bercabang Babak 2
+    function chooseBranch(choiceIdx, btnEl) {
+      if (state.branchChosen) return;
+      state.branchChosen = true;
+
+      const buttons = document.getElementById("q2a-options").querySelectorAll("button");
+      buttons.forEach(b => b.disabled = true);
+
+      const fb = document.getElementById("branch-feedback");
+      fb.classList.add("show");
+
+      if (choiceIdx === 1) {
+        state.branchRespectful = true;
+        score += 10;
+        btnEl.classList.add("correct");
+        fb.classList.add("ok");
+        fb.textContent = "✔ Pilihan Moral Terpuji (+10 poin)! Kamu memilih nilai bakti dan kerendahan hati. Mari bandingkan dengan alur legenda aslinya di Babak 3.";
+      } else {
+        state.branchRespectful = false;
+        score += 5;
+        btnEl.classList.add("wrong");
+        fb.classList.add("err");
+        fb.textContent = "⚠ Alur Legenda Asli (+5 poin): Keputusan menyangkal ibu inilah yang membawa Malin menuju badai petaka di Babak 3.";
+      }
+      updateHUD();
+    }
+
+    // Jumbled Paragraphs Babak 3
+    function initJumbled() {
+      // Acak urutan awal secara deterministik agar selalu teracak rapi
+      currentParagraphs = [
+        correctParagraphs[2],
+        correctParagraphs[0],
+        correctParagraphs[4],
+        correctParagraphs[1],
+        correctParagraphs[3]
+      ];
+      renderJumbled();
+    }
+
+    function renderJumbled() {
+      const container = document.getElementById("jumbledContainer");
+      container.innerHTML = "";
+      currentParagraphs.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "jumbled-item";
+        div.innerHTML = `
+          <span class="jumbled-num">${idx + 1}</span>
+          <span class="jumbled-text">${item.text}</span>
+          <div class="jumbled-controls">
+            <button type="button" class="move-btn" onclick="moveParagraph(${idx}, -1)" ${idx === 0 || state.q3Checked ? "disabled" : ""} aria-label="Naik">▲</button>
+            <button type="button" class="move-btn" onclick="moveParagraph(${idx}, 1)" ${idx === currentParagraphs.length - 1 || state.q3Checked ? "disabled" : ""} aria-label="Turun">▼</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function moveParagraph(index, dir) {
+      if (state.q3Checked) return;
+      const target = index + dir;
+      if (target < 0 || target >= currentParagraphs.length) return;
+      const temp = currentParagraphs[index];
+      currentParagraphs[index] = currentParagraphs[target];
+      currentParagraphs[target] = temp;
+      renderJumbled();
+    }
+
+    function checkJumbledOrder() {
+      if (state.q3Checked) return;
+      state.q3Checked = true;
+
+      let correctCount = 0;
+      currentParagraphs.forEach((item, idx) => {
+        if (item.id === idx + 1) correctCount++;
+      });
+
+      const earned = correctCount * 5; // Maksimal 5 x 5 = 25 poin
+      score += earned;
+
+      const fb = document.getElementById("q3-feedback");
+      fb.classList.add("show");
+      if (correctCount === 5) {
+        fb.classList.add("ok");
+        fb.textContent = `✔ Sempurna! Semua 5 paragraf tersusun runtut (+${earned} poin).`;
+      } else {
+        fb.classList.add("err");
+        fb.textContent = `ℹ ${correctCount} dari 5 posisi paragraf tepat (+${earned} poin). Urutan ideal: Pengenalan desa → Berlayar → Sukses kembali → Menyangkal ibu → Badai & batu.`;
+      }
+
+      renderJumbled();
+      updateHUD();
+    }
+
+    // Final Result, Badge & Pre-filled Google Forms URL
+    function renderFinalResult() {
+      document.getElementById("finalScoreDisplay").textContent = score;
+
+      let badgeName = "Narrative Apprentice";
+      let icon = "⛵";
+      if (score >= 85) {
+        badgeName = "Narrative Master";
+        icon = "🏆";
+      } else if (score >= 75) {
+        badgeName = "Story Explorer";
+        icon = "🧭";
+      }
+
+      document.getElementById("badgeIcon").textContent = icon;
+      document.getElementById("badgeTitle").textContent = `Lencana: ${badgeName}`;
+
+      const kktpEl = document.getElementById("kktpBadge");
+      const statusText = score >= 75 ? "Tuntas KKTP (≥ 75)" : "Perlu Pengayaan (< 75)";
+      kktpEl.textContent = statusText;
+      kktpEl.className = "kktp-status " + (score >= 75 ? "kktp-pass" : "kktp-retry");
+
+      const summary = `Hasil Malin's Quest v1.0 | Skor Akhir: ${score}/100 | Lencana: ${badgeName} | Status: ${statusText}`;
+      document.getElementById("summaryText").textContent = summary;
+
+      // Pre-filled URL parameter untuk memudahkan pengiriman rekap ke Google Forms
+      const encodedSummary = encodeURIComponent(summary);
+      document.getElementById("gformLink").href = `https://docs.google.com/forms/d/e/1FAIpQLSf_MalinsQuest_Rekap/viewform?usp=pp_url&entry.1001=${score}&entry.1002=${encodeURIComponent(badgeName)}&entry.1003=${encodedSummary}`;
+    }
+
+    function copyScoreSummary() {
+      const text = document.getElementById("summaryText").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        document.getElementById("copyNotice").style.display = "block";
+      });
+    }
+
+    function restartGame() {
+      score = 0;
+      currentParagraphs = [];
+      state.q1Answered = false;
+      state.branchChosen = false;
+      state.branchRespectful = false;
+      state.q2Answered = false;
+      state.q3Checked = false;
+      state.q4Answered = false;
+
+      document.querySelectorAll(".option-btn").forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove("correct", "wrong");
+      });
+      document.querySelectorAll(".feedback-msg").forEach(fb => {
+        fb.className = "feedback-msg";
+        fb.textContent = "";
+      });
+      document.getElementById("copyNotice").style.display = "none";
+
+      goToScreen(0);
+    }
+
+    // Inisialisasi awal
+    updateHUD();
+  </script>
+</body>
+</html>
+```[cite: 4]
+
+Jika Anda ingin mempublikasikan game **Malin's Quest** ini ke GitHub Pages seperti sebelumnya, simpan kode tersebut sebagai **`index.html`** di repositori GitHub baru Anda, lalu aktifkan branch **`main`** pada menu **Settings → Pages**. 
+
+Beri tahu jika ada bagian yang ingin disesuaikan (misalnya tautan Google Forms rekap atau materi soalnya)!
